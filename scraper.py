@@ -1,6 +1,6 @@
 from bs4 import BeautifulSoup
 import requests
-from services.services import get_page_updated_time
+from services.services import get_page_updated_time, scrape_txt_fields, preprocess_title, preprocess_location, preprocess_date, preprocess_price, preprocess_properties, preprocess_description
 
 # URL of the website to scrape
 domain = "https://ikman.lk"
@@ -33,6 +33,20 @@ while(updated_time_suffix in TIME_SUFFIXES and is_current):
     updated_time_prefix, updated_time_suffix = get_page_updated_time(domain, page_no)
     page_no += 1
 
-print(len(listing_urls))
+listings = []
+for url in listing_urls:
+    page = requests.get(url)
+    soup = BeautifulSoup(page.text, "html.parser")
+    listing = {
+        'title': preprocess_title(scrape_txt_fields('h1', 'title--3s1R8', soup)),
+        'location': preprocess_location(scrape_txt_fields('a', 'subtitle-location-link--1q5zA', soup)),
+        'date': preprocess_date(scrape_txt_fields('span', 'sub-title--37mkY', soup)),
+        'price': preprocess_price(scrape_txt_fields('div', 'amount--3NTpl', soup)),
+        'properties': preprocess_properties(scrape_txt_fields('div', 'word-break--2nyVq label--3oVZK', soup), scrape_txt_fields('div', 'word-break--2nyVq value--1lKHt', soup)),
+        'description': preprocess_description(scrape_txt_fields('div', 'description--1nRbz', soup)),
+    }
+    listings.append(listing)
+    
+
 
 
