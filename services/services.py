@@ -1,6 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 import re
+import json
 
 def get_page_updated_time(domain, page_no):
     page_url = f"{domain}/en/ads/sri-lanka/cars?sort=date&order=desc&buy_now=0&urgent=0&page={page_no}"
@@ -24,26 +25,54 @@ def _soup_text(value):
     return value.text
 
 def preprocess_title(title):
-    return title[0]
+    try:
+        return title[0]
+    except Exception as e:
+        print(e)
+        return None
 
 def preprocess_location(location):
-    return ''.join(location)
+    try:
+        return ''.join(location)
+    except Exception as e:
+        print(e)
+        return None
+    
 
 def preprocess_date(date):
-    return date[0].split(',')[0]
+    try:
+        return date[0].split(',')[0]
+    except Exception as e:
+        print(e)
+        return None
+    
 
 def preprocess_price(price):
-    currency, amount = _extract_currency_and_amount(price[0])
-    return {
-        "currency": currency,
-        "amount": amount
-    }
+    try:
+        currency, amount = _extract_currency_and_amount(price[0])
+        return {
+            "currency": currency,
+            "amount": amount
+        }
+    except Exception as e:
+        print(e)
+        return None
 
 def preprocess_properties(labels, values):
-    return {labels[i]: values[i] for i in range(len(labels))}
+    try:
+        return json.dumps({labels[i]: values[i] for i in range(len(labels))})
+    except Exception as e:
+        print(e)
+        return None
+    
 
 def preprocess_description(description):
-    return description[0]
+    try:
+        return description[0]
+    except Exception as e:
+        print(e)
+        return None
+    
 
 
 def _extract_currency_and_amount(currency_string):
