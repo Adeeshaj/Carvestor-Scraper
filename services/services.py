@@ -2,6 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 import re
 import json
+import sys
 
 def get_page_updated_time(domain, page_no):
     page_url = f"{domain}/en/ads/sri-lanka/cars?sort=date&order=desc&buy_now=0&urgent=0&page={page_no}"
@@ -93,3 +94,21 @@ def _extract_currency_and_amount(currency_string):
         return currency_symbol, amount
     else:
         return None
+
+
+def update_progress_bar(current, total, length=40, message="Progress"):
+    """
+    Update and display a dynamic progress bar on the same line.
+    
+    Args:
+        current (int): The current progress value.
+        total (int): The total number of steps.
+        length (int, optional): The length of the progress bar. Default is 40.
+        message (str, optional): The message to display next to the progress bar.
+    """
+    progress = current / total
+    progress_length = int(length * progress)
+    bar = "#" * progress_length + "-" * (length - progress_length)
+    sys.stdout.write("\r[{:<{}}] {} {}/{}".format(bar, length, message, current, total))
+    sys.stdout.flush()
+

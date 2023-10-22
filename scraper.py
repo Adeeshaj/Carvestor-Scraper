@@ -1,7 +1,7 @@
 from bs4 import BeautifulSoup
 import requests
 import psycopg2
-from services.services import get_page_updated_time, scrape_txt_fields, preprocess_title, preprocess_location, preprocess_date, preprocess_price, preprocess_properties, preprocess_description
+from services.services import get_page_updated_time, scrape_txt_fields, preprocess_title, preprocess_location, preprocess_date, preprocess_price, preprocess_properties, preprocess_description, update_progress_bar
 import logging
 import sys
 import os
@@ -29,16 +29,16 @@ listing_urls = []
 page_no = 1
 updated_time_prefix, updated_time_suffix = get_page_updated_time(domain, page_no)
 is_current = True
-while(updated_time_suffix in TIME_SUFFIXES and is_current and page_no<2):
+while(updated_time_suffix in TIME_SUFFIXES and is_current):
     if(updated_time_suffix == 'days'):
         try:
-            if (int(updated_time_prefix) > 1):
+            if (int(updated_time_prefix) > 7):
                 is_current = False
         except Exception as e:
             logging.exception(e)
 
     page_url = f"{domain}/en/ads/sri-lanka/cars?sort=date&order=desc&buy_now=0&urgent=0&page={page_no}"
-    print(page_url)
+    logging.info(f"Pages: {page_no} scraped")
     page = requests.get(page_url)
     soup = BeautifulSoup(page.text, "html.parser")
     cards = soup.find_all("a", class_="card-link--3ssYv gtm-ad-item", attrs={'data-testid': 'ad-card-link'})
@@ -67,11 +67,8 @@ for url in listing_urls:
     }
     listings.append(listing)
     #logging excecuted percentage
-    limit = 5
     percentage = int(len(listings)/len(listing_urls)*100)
-    if(percentage>limit):
-        logging.info(f"listings processing completed {percentage}%")
-        limit += 5
+    update_progress_bar(percentage, 100)
 
 logging.info(f"processed {len(listings)} listings")
 
