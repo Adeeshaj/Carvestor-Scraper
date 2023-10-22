@@ -4,8 +4,13 @@ import psycopg2
 from services.services import get_page_updated_time, scrape_txt_fields, preprocess_title, preprocess_location, preprocess_date, preprocess_price, preprocess_properties, preprocess_description
 import logging
 import sys
+import os
+from dotenv import load_dotenv
 
 logging.basicConfig(stream=sys.stdout, level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+# Load the .env file
+load_dotenv()
 
 # URL of the website to scrape
 domain = "https://ikman.lk"
@@ -16,7 +21,7 @@ host = "localhost"
 port = "5432" 
 table_name = "listings"
 
-
+DB_URL =  os.environ.get("PSQL_DB_URL")
 
 # get listing urls for a day
 TIME_SUFFIXES = ['', 'now', 'minutes', 'hour', 'hours', 'day', 'days']
@@ -72,13 +77,7 @@ logging.info(f"processed {len(listings)} listings")
 
 #adding data to database
 # Create a connection to the database
-conn = psycopg2.connect(
-    dbname=db_name,
-    user=user,
-    password=password,
-    host=host,
-    port=port
-)
+conn = psycopg2.connect(DB_URL)
 
 # Create a cursor
 cur = conn.cursor()
