@@ -3,6 +3,8 @@ from bs4 import BeautifulSoup
 import re
 import json
 import sys
+from datetime import datetime
+
 
 def get_page_updated_time(domain, page_no):
     page_url = f"{domain}/en/ads/sri-lanka/cars?sort=date&order=desc&buy_now=0&urgent=0&page={page_no}"
@@ -112,3 +114,7 @@ def update_progress_bar(current, total, length=40, message="Progress"):
     sys.stdout.write("\r[{:<{}}] {} {}/{}".format(bar, length, message, current, total))
     sys.stdout.flush()
 
+
+def get_current_date():
+    current_datetime = datetime.now()
+    return current_datetime.strftime("%Y-%m-%d")

@@ -1,7 +1,7 @@
 from bs4 import BeautifulSoup
 import requests
 import psycopg2
-from services.services import get_page_updated_time, scrape_txt_fields, preprocess_title, preprocess_location, preprocess_date, preprocess_price, preprocess_properties, preprocess_description, update_progress_bar
+from services.services import get_page_updated_time, scrape_txt_fields, preprocess_title, preprocess_location, preprocess_date, preprocess_price, preprocess_properties, preprocess_description, update_progress_bar, get_current_date
 import logging
 import sys
 import os
@@ -14,14 +14,15 @@ load_dotenv()
 
 # URL of the website to scrape
 domain = "https://ikman.lk"
-db_name = "carvestor"
-user = "adeeshaj"
-password = ""
-host = "localhost" 
-port = "5432" 
 table_name = "listings"
 
 DB_URL =  os.environ.get("PSQL_DB_URL")
+ENV = os.environ.get("ENV")
+
+if ENV=='dev':
+    dates_to_scraped=1
+else:
+    dates_to_scraped=7
 
 # get listing urls for a day
 TIME_SUFFIXES = ['', 'now', 'minutes', 'hour', 'hours', 'day', 'days']
@@ -32,7 +33,7 @@ is_current = True
 while(updated_time_suffix in TIME_SUFFIXES and is_current):
     if(updated_time_suffix == 'days'):
         try:
-            if (int(updated_time_prefix) > 7):
+            if (int(updated_time_prefix) > dates_to_scraped):
                 is_current = False
         except Exception as e:
             logging.exception(e)
@@ -64,6 +65,7 @@ for url in listing_urls:
         'price_currency': price['currency'] if price else None,
         'properties': preprocess_properties(scrape_txt_fields('div', 'word-break--2nyVq label--3oVZK', soup), scrape_txt_fields('div', 'word-break--2nyVq value--1lKHt', soup)),
         'description': preprocess_description(scrape_txt_fields('div', 'description--1nRbz', soup)),
+        'scraped_date': get_current_date()
     }
     listings.append(listing)
     #logging excecuted percentage
